@@ -141,3 +141,21 @@
     transform: translateY(0); 
   }
 }
+
+/* Clerk Social Button Text Override - Force White Text */
+.cl-socialButtonsBlockButton__google,
+.cl-socialButtonsBlockButton,
+[data-localization-key="socialButtonsBlockButton"] {
+  color: white !important;
+}
+
+.cl-socialButtonsBlockButton span,
+.cl-socialButtonsBlockButton__google span,
+.cl-socialButtonsBlockButton div {
+  color: white !important;
+}
+
+/* Ensure the text inside social buttons is white */
+.cl-internal-b3fm6y {
+  color: white !important;
+}
