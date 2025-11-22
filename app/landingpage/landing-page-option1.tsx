@@ -48,7 +48,7 @@ export function LandingPageOption1() {
                     <div className="w-8 h-8 bg-cyan-400 rounded-full flex items-center justify-center">
                         <div className="w-4 h-4 bg-cyan-300 rounded-full" />
                     </div>
-                    <span className="text-xl font-bold tracking-wider">INVENTORY</span>
+                    <span className="text-xl font-bold tracking-wider">STOCKMASTER</span>
                 </div>
                 <div className="flex items-center gap-4">
                     {isSignedIn ? (

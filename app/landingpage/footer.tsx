@@ -12,7 +12,7 @@ export function Footer() {
                             <div className="w-6 h-6 bg-cyan-400 rounded-full flex items-center justify-center">
                                 <div className="w-3 h-3 bg-cyan-300 rounded-full" />
                             </div>
-                            <span className="text-lg font-bold tracking-wider">INVENTORY</span>
+                            <span className="text-lg font-bold tracking-wider">STOCKMASTER</span>
                         </div>
                         <p className="text-white/50 text-sm leading-relaxed">
                             Advanced inventory management system designed for modern businesses with real-time tracking and analytics.
