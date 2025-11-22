@@ -3,17 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@clerk/nextjs';
-import { Package, Home, FileText, Truck, ArrowLeftRight, History, Settings, Warehouse, Wrench, Activity } from 'lucide-react';
+import { Package, Home, History, Settings, Warehouse, Activity, Boxes } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Products', href: '/products', icon: Package },
   { name: 'Stock', href: '/stock', icon: Warehouse },
-  { name: 'Receipts', href: '/operations/receipts', icon: FileText },
-  { name: 'Delivery', href: '/operations/deliveries', icon: Truck },
-  { name: 'Transfer', href: '/operations/transfers', icon: ArrowLeftRight },
-  { name: 'Adjustments', href: '/operations/adjustments', icon: Wrench },
+  { name: 'Operations', href: '/operations', icon: Boxes },
   { name: 'Activity Log', href: '/activity-logs', icon: Activity },
   { name: 'Move History', href: '/move-history', icon: History },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -37,7 +34,9 @@ export function Navbar() {
             <div className="hidden sm:ml-8 sm:flex sm:space-x-4">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
+                const isActive = pathname === item.href || 
+                  (item.href === '/operations' && pathname.startsWith('/operations')) ||
+                  (item.href !== '/operations' && pathname.startsWith(item.href + '/'));
                 
                 return (
                   <Link

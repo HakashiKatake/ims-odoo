@@ -11,7 +11,7 @@ export async function GET(
   try {
     await requireAuth();
     await connectDB();
-    
+
     const { id } = await params;
     const delivery = await Delivery.findById(id)
       .populate('from')
@@ -41,7 +41,7 @@ export async function PATCH(
   try {
     await requireAuth();
     await connectDB();
-    
+
     const { id } = await params;
     const body = await request.json();
     const { status } = body;
@@ -63,7 +63,7 @@ export async function PATCH(
         await updateStock({
           productId: line.product._id.toString(),
           locationId: delivery.from._id.toString(),
-          quantity: -line.quantity, // Negative for outgoing
+          quantity: line.quantity, // Stock manager handles direction based on movementType
           movementType: 'delivery',
           reference: delivery.reference,
           documentId: delivery._id.toString(),

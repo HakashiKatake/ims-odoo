@@ -39,11 +39,22 @@ export async function updateStock(movement: StockMovement): Promise<void> {
     }
 
     // Update stock based on movement type
-    const isIncoming = movement.movementType === 'receipt' || 
-                       (movement.movementType === 'adjustment' && movement.quantity > 0);
-    
-    const quantityChange = isIncoming ? movement.quantity : -movement.quantity;
-    
+    let quantityChange = 0;
+
+    switch (movement.movementType) {
+      case 'receipt':
+        quantityChange = Math.abs(movement.quantity);
+        break;
+      case 'delivery':
+        quantityChange = -Math.abs(movement.quantity);
+        break;
+      case 'adjustment':
+        quantityChange = movement.quantity;
+        break;
+      default:
+        quantityChange = movement.quantity;
+    }
+
     stock.onHand += quantityChange;
     stock.freeToUse += quantityChange;
 
@@ -105,7 +116,7 @@ export async function getStockByProduct(
 export async function getLowStockProducts(warehouseId?: string) {
   // Ensure Product model is loaded
   const ProductModel = Product;
-  
+
   const pipeline: any[] = [
     {
       $lookup: {
