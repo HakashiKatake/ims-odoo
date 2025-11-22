@@ -20,6 +20,7 @@ interface Location {
   _id: string;
   name: string;
   warehouse: {
+    _id: string;
     name: string;
   };
 }
@@ -29,7 +30,7 @@ interface ProductLine {
   quantity: number;
 }
 
-export default function NewDeliveryPage() {
+export default function NewTransferPage() {
   const router = useRouter();
   const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [products, setProducts] = useState<Product[]>([]);
@@ -37,9 +38,8 @@ export default function NewDeliveryPage() {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    contact: '',
     from: '',
-    deliveryAddress: '',
+    to: '',
     scheduleDate: new Date().toISOString().split('T')[0],
     responsible: '',
   });
@@ -95,10 +95,16 @@ export default function NewDeliveryPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.from === formData.to) {
+      alert('Source and destination locations must be different');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await fetch('/api/deliveries', {
+      const response = await fetch('/api/transfers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,70 +115,46 @@ export default function NewDeliveryPage() {
 
       if (response.ok) {
         refreshDashboard();
-        router.push('/operations/deliveries');
+        router.push('/operations/transfers');
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create delivery');
+        alert(error.error || 'Failed to create transfer');
       }
     } catch (error) {
-      console.error('Error creating delivery:', error);
-      alert('Failed to create delivery');
+      console.error('Error creating transfer:', error);
+      alert('Failed to create transfer');
     } finally {
       setLoading(false);
     }
   };
 
+  const availableToLocations = locations.filter(loc => loc._id !== formData.from);
+
   return (
     <div className="py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">New Delivery</h1>
-          <p className="mt-2 text-gray-600">Create a new outgoing stock operation</p>
+          <h1 className="text-3xl font-bold text-gray-900">New Transfer</h1>
+          <p className="mt-2 text-gray-600">Create a new internal stock transfer</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Delivery Information</CardTitle>
-              <CardDescription>Basic details about the delivery</CardDescription>
+              <CardTitle>Transfer Information</CardTitle>
+              <CardDescription>Basic details about the transfer</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact">Customer Contact *</Label>
-                  <Input
-                    id="contact"
-                    value={formData.contact}
-                    onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="responsible">Responsible Person *</Label>
-                  <Input
-                    id="responsible"
-                    value={formData.responsible}
-                    onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="deliveryAddress">Delivery Address *</Label>
-                <Input
-                  id="deliveryAddress"
-                  placeholder="Enter full delivery address"
-                  value={formData.deliveryAddress}
-                  onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
                   <Label htmlFor="from">Source Location *</Label>
-                  <Select value={formData.from} onValueChange={(value) => setFormData({ ...formData, from: value })} required>
+                  <Select 
+                    value={formData.from} 
+                    onValueChange={(value) => setFormData({ ...formData, from: value })} 
+                    required
+                  >
                     <SelectTrigger id="from">
-                      <SelectValue placeholder="Select location" />
+                      <SelectValue placeholder="Select source location" />
                     </SelectTrigger>
                     <SelectContent>
                       {locations.map((loc) => (
@@ -182,6 +164,35 @@ export default function NewDeliveryPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="to">Destination Location *</Label>
+                  <Select 
+                    value={formData.to} 
+                    onValueChange={(value) => setFormData({ ...formData, to: value })} 
+                    required
+                    disabled={!formData.from}
+                  >
+                    <SelectTrigger id="to">
+                      <SelectValue placeholder="Select destination location" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableToLocations.map((loc) => (
+                        <SelectItem key={loc._id} value={loc._id}>
+                          {loc.warehouse.name} / {loc.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="responsible">Responsible Person *</Label>
+                  <Input
+                    id="responsible"
+                    value={formData.responsible}
+                    onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
+                    required
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="scheduleDate">Schedule Date *</Label>
@@ -202,7 +213,7 @@ export default function NewDeliveryPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Products</CardTitle>
-                  <CardDescription>Select products and quantities</CardDescription>
+                  <CardDescription>Select products and quantities to transfer</CardDescription>
                 </div>
                 <Button type="button" size="sm" onClick={addProductLine}>
                   <Plus className="mr-2 h-4 w-4" />
@@ -263,7 +274,7 @@ export default function NewDeliveryPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Delivery'}
+              {loading ? 'Creating...' : 'Create Transfer'}
             </Button>
           </div>
         </form>

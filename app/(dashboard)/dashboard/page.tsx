@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Package, AlertTriangle, FileText, Truck, ArrowLeftRight, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useStore } from '@/lib/store';
 
 interface DashboardKPIs {
   totalProductsInStock: number;
@@ -19,6 +20,7 @@ interface DashboardKPIs {
 export default function DashboardPage() {
   const { user } = useUser();
   const router = useRouter();
+  const { dashboardStats, setDashboardStats, refreshDashboard } = useStore();
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,6 +40,7 @@ export default function DashboardPage() {
       if (response.ok) {
         const data = await response.json();
         setKpis(data.kpis);
+        setDashboardStats(data);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

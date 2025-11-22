@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
+import { useStore } from '@/lib/store';
 
 interface Product {
   _id: string;
@@ -30,6 +31,7 @@ interface ProductLine {
 
 export default function NewReceiptPage() {
   const router = useRouter();
+  const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [products, setProducts] = useState<Product[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [loading, setLoading] = useState(false);
@@ -105,6 +107,7 @@ export default function NewReceiptPage() {
       });
 
       if (response.ok) {
+        refreshDashboard();
         router.push('/operations/receipts');
       } else {
         const error = await response.json();

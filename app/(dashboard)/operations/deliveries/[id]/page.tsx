@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useStore } from '@/lib/store';
 
 interface Delivery {
   _id: string;
@@ -39,6 +40,7 @@ interface Delivery {
 export default function DeliveryDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [delivery, setDelivery] = useState<Delivery | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -72,6 +74,7 @@ export default function DeliveryDetailPage() {
 
       if (response.ok) {
         fetchDelivery();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to validate delivery');
@@ -95,6 +98,7 @@ export default function DeliveryDetailPage() {
 
       if (response.ok) {
         fetchDelivery();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to update delivery');

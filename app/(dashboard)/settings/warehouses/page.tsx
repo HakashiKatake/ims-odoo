@@ -8,20 +8,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useStore } from '@/lib/store';
 
 interface Warehouse {
   _id: string;
   name: string;
+  shortCode: string;
   address: string;
   locationCount?: number;
 }
 
 export default function WarehousesPage() {
+  const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingWarehouse, setEditingWarehouse] = useState<Warehouse | null>(null);
-  const [formData, setFormData] = useState({ name: '', address: '' });
+  const [formData, setFormData] = useState({ name: '', shortCode: '', address: '' });
 
   useEffect(() => {
     fetchWarehouses();
@@ -58,6 +61,7 @@ export default function WarehousesPage() {
         setFormData({ name: '', address: '' });
         setEditingWarehouse(null);
         fetchWarehouses();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to save warehouse');
@@ -70,7 +74,7 @@ export default function WarehousesPage() {
 
   const handleEdit = (warehouse: Warehouse) => {
     setEditingWarehouse(warehouse);
-    setFormData({ name: warehouse.name, address: warehouse.address });
+    setFormData({ name: warehouse.name, shortCode: warehouse.shortCode, address: warehouse.address });
     setDialogOpen(true);
   };
 
@@ -81,6 +85,7 @@ export default function WarehousesPage() {
       const response = await fetch(`/api/warehouses/${id}`, { method: 'DELETE' });
       if (response.ok) {
         fetchWarehouses();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete warehouse');
@@ -94,7 +99,7 @@ export default function WarehousesPage() {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingWarehouse(null);
-    setFormData({ name: '', address: '' });
+    setFormData({ name: '', shortCode: '', address: '' });
   };
 
   return (
@@ -126,6 +131,16 @@ export default function WarehousesPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="shortCode">Short Code *</Label>
+                  <Input
+                    id="shortCode"
+                    placeholder="e.g., WH01, MAIN"
+                    value={formData.shortCode}
+                    onChange={(e) => setFormData({ ...formData, shortCode: e.target.value.toUpperCase() })}
                     required
                   />
                 </div>

@@ -9,10 +9,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useStore } from '@/lib/store';
 
 interface Location {
   _id: string;
   name: string;
+  shortCode: string;
   warehouse: {
     _id: string;
     name: string;
@@ -25,12 +27,13 @@ interface Warehouse {
 }
 
 export default function LocationsPage() {
+  const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [locations, setLocations] = useState<Location[]>([]);
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingLocation, setEditingLocation] = useState<Location | null>(null);
-  const [formData, setFormData] = useState({ name: '', warehouse: '' });
+  const [formData, setFormData] = useState({ name: '', shortCode: '', warehouse: '' });
 
   useEffect(() => {
     fetchLocations();
@@ -77,9 +80,10 @@ export default function LocationsPage() {
 
       if (response.ok) {
         setDialogOpen(false);
-        setFormData({ name: '', warehouse: '' });
+        setFormData({ name: '', shortCode: '', warehouse: '' });
         setEditingLocation(null);
         fetchLocations();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to save location');
@@ -92,7 +96,7 @@ export default function LocationsPage() {
 
   const handleEdit = (location: Location) => {
     setEditingLocation(location);
-    setFormData({ name: location.name, warehouse: location.warehouse._id });
+    setFormData({ name: location.name, shortCode: location.shortCode, warehouse: location.warehouse._id });
     setDialogOpen(true);
   };
 
@@ -103,6 +107,7 @@ export default function LocationsPage() {
       const response = await fetch(`/api/locations/${id}`, { method: 'DELETE' });
       if (response.ok) {
         fetchLocations();
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to delete location');
@@ -116,7 +121,7 @@ export default function LocationsPage() {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingLocation(null);
-    setFormData({ name: '', warehouse: '' });
+    setFormData({ name: '', shortCode: '', warehouse: '' });
   };
 
   return (
@@ -161,6 +166,16 @@ export default function LocationsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="shortCode">Short Code *</Label>
+                  <Input
+                    id="shortCode"
+                    placeholder="e.g., A-1, B-2, SHELF-01"
+                    value={formData.shortCode}
+                    onChange={(e) => setFormData({ ...formData, shortCode: e.target.value.toUpperCase() })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="name">Location Name *</Label>
                   <Input
                     id="name"
@@ -201,6 +216,7 @@ export default function LocationsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Short Code</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Warehouse</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -209,6 +225,7 @@ export default function LocationsPage() {
                 <TableBody>
                   {locations.map((location) => (
                     <TableRow key={location._id}>
+                      <TableCell className="font-mono text-xs text-gray-600">{location.shortCode}</TableCell>
                       <TableCell className="font-medium">{location.name}</TableCell>
                       <TableCell>{location.warehouse.name}</TableCell>
                       <TableCell className="text-right">

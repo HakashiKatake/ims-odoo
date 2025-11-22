@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { useStore } from '@/lib/store';
 
 interface Product {
   _id: string;
@@ -22,6 +23,7 @@ interface Product {
 }
 
 export default function ProductsPage() {
+  const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -79,6 +81,8 @@ export default function ProductsPage() {
         setIsDialogOpen(false);
         resetForm();
         fetchProducts();
+        // Refresh dashboard to update product count
+        refreshDashboard();
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to save product');
@@ -113,6 +117,8 @@ export default function ProductsPage() {
 
       if (response.ok) {
         fetchProducts();
+        // Refresh dashboard to update product count
+        refreshDashboard();
       } else {
         alert('Failed to delete product');
       }

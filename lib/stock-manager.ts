@@ -15,9 +15,6 @@ interface StockMovement {
 }
 
 export async function updateStock(movement: StockMovement): Promise<void> {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const location = await Location.findById(movement.locationId).populate('warehouse');
     if (!location) {
@@ -53,7 +50,7 @@ export async function updateStock(movement: StockMovement): Promise<void> {
       throw new Error('Insufficient stock');
     }
 
-    await stock.save({ session });
+    await stock.save();
 
     // Create ledger entry
     const ledgerEntry = new StockLedger({
@@ -70,14 +67,9 @@ export async function updateStock(movement: StockMovement): Promise<void> {
       responsible: movement.responsible,
     });
 
-    await ledgerEntry.save({ session });
-
-    await session.commitTransaction();
+    await ledgerEntry.save();
   } catch (error) {
-    await session.abortTransaction();
     throw error;
-  } finally {
-    session.endSession();
   }
 }
 
