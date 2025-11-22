@@ -1,5 +1,6 @@
 import { SignIn } from '@clerk/nextjs';
-import { Package, Sparkles } from 'lucide-react';
+import { StockMasterLogo } from '@/components/stock-master-logo';
+import { Sparkles } from 'lucide-react';
 
 export default function SignInPage() {
   return (
@@ -14,9 +15,7 @@ export default function SignInPage() {
       <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md">
         {/* Logo and branding */}
         <div className="flex justify-center mb-6">
-          <div className="bg-cyan-500/10 p-4 rounded-2xl border border-cyan-500/20 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
-            <Package className="h-12 w-12 text-cyan-400" />
-          </div>
+          <StockMasterLogo variant="large" showVersion={false} />
         </div>
 
         <h2 className="text-center text-4xl font-bold tracking-tight text-white mb-2">

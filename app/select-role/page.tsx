@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { Shield, Users, ArrowRight, Sparkles } from 'lucide-react';
+import { Shield, Users, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { StockMasterLogo } from '@/components/stock-master-logo';
 
 export default function SelectRolePage() {
   const router = useRouter();
@@ -51,9 +52,7 @@ export default function SelectRolePage() {
       <div className="max-w-4xl w-full relative z-10">
         <div className="text-center mb-10">
           <div className="flex justify-center mb-6">
-            <div className="bg-cyan-500/10 p-3 rounded-2xl border border-cyan-500/20 shadow-[0_0_30px_rgba(34,211,238,0.2)]">
-              <Sparkles className="h-10 w-10 text-cyan-400" />
-            </div>
+            <StockMasterLogo variant="large" showVersion={false} />
           </div>
           <h1 className="text-4xl font-bold tracking-tight text-white mb-3">
             Select Your <span className="text-cyan-400">Role</span>

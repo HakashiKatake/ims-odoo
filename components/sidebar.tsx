@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { Package, Home, History, Settings, Warehouse, Activity, Boxes } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { StockMasterLogo } from './stock-master-logo';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
@@ -24,17 +25,7 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 h-screen w-64 bg-[#0B0E14] border-r border-[#2A3241] flex flex-col z-40">
       {/* Logo Section */}
       <div className="p-6 border-b border-[#2A3241]">
-        <Link href="/dashboard" className="flex items-center space-x-3 group">
-          <div className="bg-cyan-500/10 p-2.5 rounded-lg border border-cyan-500/20 group-hover:border-cyan-500/50 transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]">
-            <Package className="h-7 w-7 text-cyan-400" />
-          </div>
-          <div>
-            <span className="text-xl font-bold text-white tracking-tight block">
-              Stock<span className="text-cyan-400">Master</span>
-            </span>
-            <span className="text-[10px] text-slate-500 uppercase tracking-widest font-mono">IMS v2.0</span>
-          </div>
-        </Link>
+        <StockMasterLogo linkTo="/dashboard" />
       </div>
 
       {/* Navigation Links */}
