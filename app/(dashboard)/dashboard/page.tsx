@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
+<<<<<<< HEAD
 import { Package, AlertTriangle, FileText, Truck, ArrowLeftRight, TrendingUp, Activity, BarChart3 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,10 @@ interface DashboardKPIs {
   pendingDeliveries: number;
   internalTransfersScheduled: number;
 }
+=======
+import Dashboard from '@/components/Dashboard';
+import { Product, StockOperation } from '@/types/dashboard';
+>>>>>>> 45a53d0 (push)
 
 interface AnalyticsData {
   stockOverview: {
@@ -52,9 +57,14 @@ interface AnalyticsData {
 export default function DashboardPage() {
   const { user } = useUser();
   const router = useRouter();
+<<<<<<< HEAD
   const { dashboardStats, setDashboardStats, refreshDashboard } = useStore();
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+=======
+  const [products, setProducts] = useState<Product[]>([]);
+  const [history, setHistory] = useState<StockOperation[]>([]);
+>>>>>>> 45a53d0 (push)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,6 +74,7 @@ export default function DashboardPage() {
       return;
     }
 
+<<<<<<< HEAD
     fetchDashboardData();
     fetchAnalytics();
 
@@ -74,15 +85,47 @@ export default function DashboardPage() {
     }, 30000);
 
     return () => clearInterval(interval);
+=======
+    fetchData();
+>>>>>>> 45a53d0 (push)
   }, [user, router]);
 
-  const fetchDashboardData = async () => {
+  const fetchData = async () => {
     try {
-      const response = await fetch('/api/dashboard');
-      if (response.ok) {
-        const data = await response.json();
-        setKpis(data.kpis);
-        setDashboardStats(data);
+      const [stockRes, productsRes, dashboardRes] = await Promise.all([
+        fetch('/api/stock'),
+        fetch('/api/products?limit=1000'),
+        fetch('/api/dashboard')
+      ]);
+
+      if (stockRes.ok && productsRes.ok && dashboardRes.ok) {
+        const stockData = await stockRes.json();
+        const productsData = await productsRes.json();
+        const dashboardData = await dashboardRes.json();
+
+        // Map products and merge with stock
+        const mappedProducts: Product[] = productsData.products.map((p: any) => {
+          const stockItem = stockData.stock.find((s: any) => s.product._id === p._id);
+          return {
+            _id: p._id,
+            name: p.name,
+            quantity: stockItem ? stockItem.totalOnHand : 0,
+            price: p.perUnitCost,
+            minLevel: p.minStockLevel || 0,
+            category: p.category
+          };
+        });
+
+        setProducts(mappedProducts);
+
+        // Map history (recent activity is mostly receipts in the current dashboard API)
+        const mappedHistory: StockOperation[] = dashboardData.recentActivity.map((a: any) => ({
+            _id: a._id,
+            type: 'receipt',
+            status: a.status,
+            date: a.createdAt
+        }));
+        setHistory(mappedHistory);
       }
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -105,16 +148,17 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)] bg-slate-950">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
+          <p className="mt-4 text-slate-400">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
+<<<<<<< HEAD
     <div className="py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -432,6 +476,10 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+=======
+    <div className="min-h-screen bg-slate-950 p-4 md:p-8">
+      <Dashboard products={products} history={history} />
+>>>>>>> 45a53d0 (push)
     </div>
   );
 }

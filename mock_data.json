@@ -1,0 +1,229 @@
+{
+  "warehouses": [
+    {
+      "_id": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "name": "Main Warehouse",
+      "shortCode": "WH-MAIN",
+      "address": "123 Main St, Tech City",
+      "createdAt": {"$date": "2023-11-20T10:00:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:00:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1b9f8f1b2c0012345679"},
+      "name": "East Wing Storage",
+      "shortCode": "WH-EAST",
+      "address": "456 East Ave, Tech City",
+      "createdAt": {"$date": "2023-11-20T10:00:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:00:00Z"},
+      "__v": 0
+    }
+  ],
+  "locations": [
+    {
+      "_id": {"$oid": "655c1c008f1b2c0012345680"},
+      "name": "Shelf A1",
+      "shortCode": "WH-MAIN-A1",
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "createdAt": {"$date": "2023-11-20T10:05:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:05:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c008f1b2c0012345681"},
+      "name": "Shelf B2",
+      "shortCode": "WH-MAIN-B2",
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "createdAt": {"$date": "2023-11-20T10:05:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:05:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c008f1b2c0012345682"},
+      "name": "Bin X1",
+      "shortCode": "WH-EAST-X1",
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345679"},
+      "createdAt": {"$date": "2023-11-20T10:05:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:05:00Z"},
+      "__v": 0
+    }
+  ],
+  "products": [
+    {
+      "_id": {"$oid": "655c1c508f1b2c0012345690"},
+      "name": "Gaming Laptop Pro",
+      "sku": "LAP-001",
+      "category": "Electronics",
+      "unitOfMeasure": "Unit",
+      "perUnitCost": 1200,
+      "description": "High performance gaming laptop",
+      "minStockLevel": 5,
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-20T10:10:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:10:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c508f1b2c0012345691"},
+      "name": "Wireless Mouse",
+      "sku": "ACC-001",
+      "category": "Accessories",
+      "unitOfMeasure": "Unit",
+      "perUnitCost": 25,
+      "description": "Ergonomic wireless mouse",
+      "minStockLevel": 20,
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-20T10:10:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:10:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c508f1b2c0012345692"},
+      "name": "Mechanical Keyboard",
+      "sku": "ACC-002",
+      "category": "Accessories",
+      "unitOfMeasure": "Unit",
+      "perUnitCost": 80,
+      "description": "RGB Mechanical Keyboard",
+      "minStockLevel": 10,
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-20T10:10:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:10:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c508f1b2c0012345693"},
+      "name": "27-inch Monitor",
+      "sku": "MON-001",
+      "category": "Electronics",
+      "unitOfMeasure": "Unit",
+      "perUnitCost": 300,
+      "description": "4K UHD Monitor",
+      "minStockLevel": 8,
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-20T10:10:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:10:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1c508f1b2c0012345694"},
+      "name": "Office Chair",
+      "sku": "FUR-001",
+      "category": "Furniture",
+      "unitOfMeasure": "Unit",
+      "perUnitCost": 150,
+      "description": "Comfortable office chair",
+      "minStockLevel": 5,
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-20T10:10:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:10:00Z"},
+      "__v": 0
+    }
+  ],
+  "stocks": [
+    {
+      "_id": {"$oid": "655c1d008f1b2c0012345700"},
+      "product": {"$oid": "655c1c508f1b2c0012345690"},
+      "location": {"$oid": "655c1c008f1b2c0012345680"},
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "onHand": 15,
+      "freeToUse": 15,
+      "createdAt": {"$date": "2023-11-20T10:15:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:15:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1d008f1b2c0012345701"},
+      "product": {"$oid": "655c1c508f1b2c0012345691"},
+      "location": {"$oid": "655c1c008f1b2c0012345680"},
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "onHand": 50,
+      "freeToUse": 50,
+      "createdAt": {"$date": "2023-11-20T10:15:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:15:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1d008f1b2c0012345702"},
+      "product": {"$oid": "655c1c508f1b2c0012345692"},
+      "location": {"$oid": "655c1c008f1b2c0012345681"},
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345678"},
+      "onHand": 8,
+      "freeToUse": 8,
+      "createdAt": {"$date": "2023-11-20T10:15:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:15:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1d008f1b2c0012345703"},
+      "product": {"$oid": "655c1c508f1b2c0012345693"},
+      "location": {"$oid": "655c1c008f1b2c0012345682"},
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345679"},
+      "onHand": 12,
+      "freeToUse": 12,
+      "createdAt": {"$date": "2023-11-20T10:15:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:15:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1d008f1b2c0012345704"},
+      "product": {"$oid": "655c1c508f1b2c0012345694"},
+      "location": {"$oid": "655c1c008f1b2c0012345682"},
+      "warehouse": {"$oid": "655c1b9f8f1b2c0012345679"},
+      "onHand": 2,
+      "freeToUse": 2,
+      "createdAt": {"$date": "2023-11-20T10:15:00Z"},
+      "updatedAt": {"$date": "2023-11-20T10:15:00Z"},
+      "__v": 0
+    }
+  ],
+  "receipts": [
+    {
+      "_id": {"$oid": "655c1d508f1b2c0012345710"},
+      "reference": "WH/IN/00001",
+      "contact": "Tech Supplier Inc.",
+      "from": "Vendor Location",
+      "to": {"$oid": "655c1c008f1b2c0012345680"},
+      "scheduleDate": {"$date": "2023-11-21T09:00:00Z"},
+      "status": "done",
+      "products": [
+        {
+          "product": {"$oid": "655c1c508f1b2c0012345690"},
+          "quantity": 10,
+          "receivedQuantity": 10
+        },
+        {
+          "product": {"$oid": "655c1c508f1b2c0012345691"},
+          "quantity": 20,
+          "receivedQuantity": 20
+        }
+      ],
+      "responsible": "Admin User",
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-21T09:00:00Z"},
+      "updatedAt": {"$date": "2023-11-21T10:00:00Z"},
+      "__v": 0
+    },
+    {
+      "_id": {"$oid": "655c1d508f1b2c0012345711"},
+      "reference": "WH/IN/00002",
+      "contact": "Office Depot",
+      "from": "Vendor Location",
+      "to": {"$oid": "655c1c008f1b2c0012345682"},
+      "scheduleDate": {"$date": "2023-11-22T14:00:00Z"},
+      "status": "ready",
+      "products": [
+        {
+          "product": {"$oid": "655c1c508f1b2c0012345694"},
+          "quantity": 5,
+          "receivedQuantity": 0
+        }
+      ],
+      "responsible": "Admin User",
+      "createdBy": "user_mock",
+      "createdAt": {"$date": "2023-11-22T13:00:00Z"},
+      "updatedAt": {"$date": "2023-11-22T13:00:00Z"},
+      "__v": 0
+    }
+  ]
+}
