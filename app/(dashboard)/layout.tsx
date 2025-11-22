@@ -1,4 +1,4 @@
-import { Navbar } from '@/components/navbar';
+import { Sidebar } from '@/components/sidebar';
 import  AIChat  from '@/components/ai-chatbot';
 
 export default function DashboardLayout({
@@ -7,9 +7,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#0B0E14]">
-      <Navbar />
-      <main>{children}</main>
+    <div className="min-h-screen bg-[#0B0E14] flex">
+      <Sidebar />
+      <main className="flex-1 ml-64">{children}</main>
       <AIChat inventory={[]} history={[]} />
     </div>
   );
