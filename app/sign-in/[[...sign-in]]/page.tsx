@@ -20,6 +20,8 @@ export default function SignInPage() {
               card: "shadow-lg",
             },
           }}
+          forceRedirectUrl="/landingpage"
+          signUpUrl="/sign-up"
         />
       </div>
 

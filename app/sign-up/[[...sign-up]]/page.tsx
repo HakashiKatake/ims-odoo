@@ -20,24 +20,19 @@ export default function SignUpPage() {
               card: "shadow-lg",
             },
           }}
+          forceRedirectUrl="/landingpage"
+          signInUrl="/sign-in"
         />
       </div>
 
       <div className="mt-6 text-center">
-        <div className="px-4 py-3 bg-purple-50 border border-purple-200 rounded-lg max-w-md mx-auto">
-          <p className="text-sm text-purple-800 font-medium mb-2">
-            After signing up, select your role:
+        <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
+          <p className="text-sm text-blue-800 font-medium mb-2">
+            ✨ Welcome to StockMaster!
           </p>
-          <div className="grid grid-cols-2 gap-3 text-xs text-purple-700 mt-3">
-            <div className="bg-white p-2 rounded border border-purple-100">
-              <div className="font-semibold">👤 Admin</div>
-              <div>Full system access</div>
-            </div>
-            <div className="bg-white p-2 rounded border border-purple-100">
-              <div className="font-semibold">👥 Staff</div>
-              <div>View-only access</div>
-            </div>
-          </div>
+          <p className="text-xs text-blue-700">
+            After signing up, you'll be taken to explore our powerful inventory management features.
+          </p>
         </div>
       </div>
     </div>
