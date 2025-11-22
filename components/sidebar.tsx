@@ -77,7 +77,7 @@ export function Sidebar() {
           <div className="flex items-center space-x-3 p-3 rounded-lg bg-slate-900/50 border border-slate-800 hover:border-cyan-500/30 transition-all duration-300">
             <div className="ring-2 ring-cyan-500/20 rounded-full hover:ring-cyan-500/50 transition-all">
               <UserButton 
-                afterSignOutUrl="/" 
+                afterSignOutUrl="/landingpage" 
                 appearance={{
                   elements: {
                     avatarBox: "h-10 w-10"
