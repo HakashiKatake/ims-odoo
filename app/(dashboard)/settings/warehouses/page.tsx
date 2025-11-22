@@ -1,15 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Edit, Trash2, Warehouse as WarehouseIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Warehouse as WarehouseIcon, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useStore } from '@/lib/store';
+import Link from 'next/link';
 
 interface Warehouse {
   _id: string;
@@ -58,6 +57,7 @@ export default function WarehousesPage() {
       });
 
       if (response.ok) {
+        toast.success(editingWarehouse ? 'Warehouse updated successfully' : 'Warehouse created successfully');
         setDialogOpen(false);
         setFormData({ name: '', shortCode: '', address: '' });
         setEditingWarehouse(null);
@@ -85,6 +85,7 @@ export default function WarehousesPage() {
     try {
       const response = await fetch(`/api/warehouses/${id}`, { method: 'DELETE' });
       if (response.ok) {
+        toast.success('Warehouse deleted successfully');
         fetchWarehouses();
         refreshDashboard();
       } else {
@@ -104,103 +105,148 @@ export default function WarehousesPage() {
   };
 
   return (
-    <div className="py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Warehouses</h1>
-            <p className="mt-2 text-gray-600">Manage warehouse locations</p>
+    <div className="min-h-screen bg-slate-950 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in pb-10">
+        {/* Header */}
+        <div className="flex flex-col gap-4 border-b border-indigo-500/30 pb-6 relative">
+          <div className="absolute bottom-0 left-0 w-32 h-[2px] bg-cyan-500 shadow-[0_0_10px_cyan]"></div>
+          <Link href="/settings" className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 w-fit">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="text-sm">Back to Settings</span>
+          </Link>
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="text-4xl font-light text-white tracking-tight mb-1">
+                WARE<span className="font-bold text-cyan-400">HOUSES</span>
+              </h1>
+              <p className="text-sm text-indigo-200 tracking-wider uppercase">
+                Manage warehouse locations
+              </p>
+            </div>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => handleCloseDialog()}
+                  className="bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500/50"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Warehouse
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-900 border-slate-800">
+                <DialogHeader>
+                  <DialogTitle className="text-white">{editingWarehouse ? 'Edit Warehouse' : 'New Warehouse'}</DialogTitle>
+                  <DialogDescription className="text-slate-400">
+                    {editingWarehouse ? 'Update warehouse information' : 'Add a new warehouse location'}
+                  </DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-slate-300">Name *</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="shortCode" className="text-slate-300">Short Code *</Label>
+                    <Input
+                      id="shortCode"
+                      placeholder="e.g., WH01, MAIN"
+                      value={formData.shortCode}
+                      onChange={(e) => setFormData({ ...formData, shortCode: e.target.value.toUpperCase() })}
+                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address" className="text-slate-300">Address *</Label>
+                    <Input
+                      id="address"
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleCloseDialog}
+                      className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="submit"
+                      className="bg-cyan-600 hover:bg-cyan-700 text-white border-cyan-500/50"
+                    >
+                      {editingWarehouse ? 'Update' : 'Create'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => handleCloseDialog()}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Warehouse
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{editingWarehouse ? 'Edit Warehouse' : 'New Warehouse'}</DialogTitle>
-                <DialogDescription>
-                  {editingWarehouse ? 'Update warehouse information' : 'Add a new warehouse location'}
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="shortCode">Short Code *</Label>
-                  <Input
-                    id="shortCode"
-                    placeholder="e.g., WH01, MAIN"
-                    value={formData.shortCode}
-                    onChange={(e) => setFormData({ ...formData, shortCode: e.target.value.toUpperCase() })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address *</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={handleCloseDialog}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingWarehouse ? 'Update' : 'Create'}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>All Warehouses</CardTitle>
-            <CardDescription>Manage your warehouse locations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="py-12 text-center text-gray-500">Loading warehouses...</div>
-            ) : warehouses.length === 0 ? (
-              <div className="py-12 text-center">
-                <WarehouseIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-4 text-sm font-medium text-gray-900">No warehouses</h3>
-                <p className="mt-2 text-sm text-gray-500">Get started by creating a new warehouse.</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+        {/* Warehouses Table */}
+        <div className="card p-6 rounded-xl bg-slate-900 border border-slate-800">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+              <WarehouseIcon className="h-5 w-5 text-cyan-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white uppercase tracking-wider">All Warehouses</h3>
+              <p className="text-xs text-slate-400">Manage your warehouse locations</p>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="py-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
+              <p className="mt-4 text-slate-400">Loading warehouses...</p>
+            </div>
+          ) : warehouses.length === 0 ? (
+            <div className="py-12 text-center">
+              <WarehouseIcon className="mx-auto h-12 w-12 text-slate-600" />
+              <h3 className="mt-4 text-sm font-medium text-white">No warehouses</h3>
+              <p className="mt-2 text-sm text-slate-400">Get started by creating a new warehouse.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-800">
+                    <th className="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Name</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Code</th>
+                    <th className="text-left py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Address</th>
+                    <th className="text-right py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {warehouses.map((warehouse) => (
-                    <TableRow key={warehouse._id}>
-                      <TableCell className="font-medium">{warehouse.name}</TableCell>
-                      <TableCell>{warehouse.address}</TableCell>
-                      <TableCell className="text-right">
+                    <tr key={warehouse._id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <span className="text-sm font-medium text-white">{warehouse.name}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="font-mono text-sm text-cyan-400">{warehouse.shortCode}</span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="text-sm text-slate-300">{warehouse.address}</span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleEdit(warehouse)}
+                            className="bg-slate-800 border-slate-700 text-blue-400 hover:bg-blue-900/20 hover:text-blue-300"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -208,18 +254,19 @@ export default function WarehousesPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleDelete(warehouse._id)}
+                            className="bg-slate-800 border-slate-700 text-red-400 hover:bg-red-900/20 hover:text-red-300"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

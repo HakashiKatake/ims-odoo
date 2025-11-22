@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import Transfer from '@/models/Transfer';
 import { requireAuth } from '@/lib/auth';
 import Location from '@/models/Location';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -119,6 +120,17 @@ export async function POST(request: NextRequest) {
       populate: { path: 'warehouse' }
     });
     await transfer.populate('products.product');
+
+    // Log activity
+    const fromLoc = fromLocation as any;
+    const toLoc = toLocation as any;
+    await logActivity({
+      action: 'create',
+      entityType: 'transfer',
+      entityId: transfer._id.toString(),
+      entityReference: transfer.reference,
+      description: `Created transfer ${transfer.reference} from ${fromLoc.warehouse.name}/${fromLoc.name} to ${toLoc.warehouse.name}/${toLoc.name} with ${transfer.products.length} product(s)`,
+    });
 
     return NextResponse.json({ transfer }, { status: 201 });
   } catch (error: any) {

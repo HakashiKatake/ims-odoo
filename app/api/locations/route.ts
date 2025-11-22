@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Location from '@/models/Location';
 import { requireAuth } from '@/lib/auth';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function GET(request: NextRequest) {
     const warehouseId = searchParams.get('warehouse');
 
     const query = warehouseId ? { warehouse: warehouseId } : {};
-    
+
     const locations = await Location.find(query)
       .populate('warehouse')
       .sort({ createdAt: -1 });
@@ -42,11 +43,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingLocation = await Location.findOne({ 
+    const existingLocation = await Location.findOne({
       warehouse,
       shortCode: shortCode.toUpperCase(),
     });
-    
+
     if (existingLocation) {
       return NextResponse.json(
         { error: 'Location with this code already exists in this warehouse' },
@@ -61,6 +62,15 @@ export async function POST(request: NextRequest) {
     });
 
     await location.populate('warehouse');
+
+    // Log activity
+    await logActivity({
+      action: 'create',
+      entityType: 'location',
+      entityId: location._id.toString(),
+      entityReference: `${(location.warehouse as any).shortCode}-${location.shortCode}`,
+      description: `Created location ${location.name} (${location.shortCode}) in warehouse ${(location.warehouse as any).name}`,
+    });
 
     return NextResponse.json({ location }, { status: 201 });
   } catch (error: any) {

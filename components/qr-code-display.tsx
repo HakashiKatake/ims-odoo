@@ -125,7 +125,7 @@ export function QRCodeDisplay({
       QR Code
     </Button>
   ) : (
-    <Button variant="ghost" size="icon">
+    <Button variant="ghost" size="icon" className="text-white hover:text-cyan-400 hover:bg-slate-800">
       <QrCode className="h-4 w-4" />
     </Button>
   );

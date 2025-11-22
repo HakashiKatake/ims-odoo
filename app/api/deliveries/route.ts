@@ -4,6 +4,7 @@ import Delivery from '@/models/Delivery';
 import { requireAuth } from '@/lib/auth';
 import { updateStock } from '@/lib/stock-manager';
 import Location from '@/models/Location';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -98,6 +99,15 @@ export async function POST(request: NextRequest) {
 
     await delivery.populate('from');
     await delivery.populate('products.product');
+
+    // Log activity
+    await logActivity({
+      action: 'create',
+      entityType: 'delivery',
+      entityId: delivery._id.toString(),
+      entityReference: delivery.reference,
+      description: `Created delivery ${delivery.reference} with ${delivery.products.length} product(s) for ${contact}`,
+    });
 
     return NextResponse.json({ delivery }, { status: 201 });
   } catch (error: any) {

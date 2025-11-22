@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import Adjustment from '@/models/Adjustment';
 import { requireAuth } from '@/lib/auth';
 import Location from '@/models/Location';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -101,6 +102,16 @@ export async function POST(request: NextRequest) {
       populate: { path: 'warehouse' }
     });
     await adjustment.populate('products.product');
+
+    // Log activity
+    const loc = locationDoc as any;
+    await logActivity({
+      action: 'create',
+      entityType: 'adjustment',
+      entityId: adjustment._id.toString(),
+      entityReference: adjustment.reference,
+      description: `Created adjustment ${adjustment.reference} at ${loc.warehouse.name}/${loc.name} (${reason}) with ${adjustment.products.length} product(s)`,
+    });
 
     return NextResponse.json({ adjustment }, { status: 201 });
   } catch (error: any) {

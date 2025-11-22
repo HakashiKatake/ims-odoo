@@ -38,10 +38,19 @@ export default function ActivityLogsPage() {
       if (actionFilter !== 'all') params.set('action', actionFilter);
       params.set('limit', '100');
 
+      console.log('Fetching activity logs with params:', params.toString());
       const response = await fetch(`/api/activity-logs?${params}`);
+      console.log('Response status:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
-        setLogs(data);
+        console.log('Activity logs data:', data);
+        console.log('Data type:', Array.isArray(data), 'Length:', data?.length);
+        setLogs(Array.isArray(data) ? data : []);
+      } else {
+        console.error('Failed to fetch activity logs:', response.statusText);
+        const errorData = await response.text();
+        console.error('Error response:', errorData);
       }
     } catch (error) {
       console.error('Error fetching activity logs:', error);
@@ -179,7 +188,22 @@ export default function ActivityLogsPage() {
             <div className="py-12 text-center">
               <Activity className="mx-auto h-12 w-12 text-slate-600" />
               <h3 className="mt-4 text-sm font-medium text-slate-400">No activities found</h3>
-              <p className="mt-2 text-sm text-slate-500">Try adjusting your filters.</p>
+              <p className="mt-2 text-sm text-slate-500">
+                {entityTypeFilter === 'all' && actionFilter === 'all' 
+                  ? 'Activity logs will appear here when you create, update, or delete items in the system.' 
+                  : 'Try adjusting your filters or clearing them to see all activities.'}
+              </p>
+              {(entityTypeFilter !== 'all' || actionFilter !== 'all') && (
+                <button
+                  onClick={() => {
+                    setEntityTypeFilter('all');
+                    setActionFilter('all');
+                  }}
+                  className="mt-4 text-sm text-cyan-400 hover:text-cyan-300 underline"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">

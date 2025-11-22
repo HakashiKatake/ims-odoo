@@ -4,6 +4,7 @@ import Receipt from '@/models/Receipt';
 import { requireAuth } from '@/lib/auth';
 import { updateStock } from '@/lib/stock-manager';
 import Location from '@/models/Location';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -96,6 +97,15 @@ export async function POST(request: NextRequest) {
 
     await receipt.populate('to');
     await receipt.populate('products.product');
+
+    // Log activity
+    await logActivity({
+      action: 'create',
+      entityType: 'receipt',
+      entityId: receipt._id.toString(),
+      entityReference: receipt.reference,
+      description: `Created receipt ${receipt.reference} with ${receipt.products.length} product(s) for ${contact}`,
+    });
 
     return NextResponse.json({ receipt }, { status: 201 });
   } catch (error: any) {

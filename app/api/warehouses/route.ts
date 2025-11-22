@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Warehouse from '@/models/Warehouse';
 import { requireAuth } from '@/lib/auth';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -35,10 +36,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const existingWarehouse = await Warehouse.findOne({ 
-      shortCode: shortCode.toUpperCase() 
+    const existingWarehouse = await Warehouse.findOne({
+      shortCode: shortCode.toUpperCase()
     });
-    
+
     if (existingWarehouse) {
       return NextResponse.json(
         { error: 'Warehouse with this code already exists' },
@@ -50,6 +51,15 @@ export async function POST(request: NextRequest) {
       name,
       shortCode: shortCode.toUpperCase(),
       address,
+    });
+
+    // Log activity
+    await logActivity({
+      action: 'create',
+      entityType: 'warehouse',
+      entityId: warehouse._id.toString(),
+      entityReference: warehouse.shortCode,
+      description: `Created warehouse ${warehouse.name} (${warehouse.shortCode}) at ${warehouse.address}`,
     });
 
     return NextResponse.json({ warehouse }, { status: 201 });

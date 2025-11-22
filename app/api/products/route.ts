@@ -3,6 +3,7 @@ import connectDB from '@/lib/db';
 import Product from '@/models/Product';
 import { requireAuth } from '@/lib/auth';
 import { getStockByProduct } from '@/lib/stock-manager';
+import { logActivity } from '@/lib/activity-logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -89,6 +90,15 @@ export async function POST(request: NextRequest) {
       description,
       minStockLevel: minStockLevel || 0,
       createdBy: userId,
+    });
+
+    // Log activity
+    await logActivity({
+      action: 'create',
+      entityType: 'product',
+      entityId: product._id.toString(),
+      entityReference: product.sku,
+      description: `Created product ${product.name} (${product.sku}) in category ${product.category}`,
     });
 
     return NextResponse.json({ product }, { status: 201 });
