@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, Warehouse as WarehouseIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -58,17 +59,17 @@ export default function WarehousesPage() {
 
       if (response.ok) {
         setDialogOpen(false);
-        setFormData({ name: '', address: '' });
+        setFormData({ name: '', shortCode: '', address: '' });
         setEditingWarehouse(null);
         fetchWarehouses();
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to save warehouse');
+        toast.error(error.error || 'Failed to save warehouse');
       }
     } catch (error) {
       console.error('Error saving warehouse:', error);
-      alert('Failed to save warehouse');
+      toast.error('Failed to save warehouse');
     }
   };
 
@@ -88,11 +89,11 @@ export default function WarehousesPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to delete warehouse');
+        toast.error(error.error || 'Failed to delete warehouse');
       }
     } catch (error) {
       console.error('Error deleting warehouse:', error);
-      alert('Failed to delete warehouse');
+      toast.error('Failed to delete warehouse');
     }
   };
 

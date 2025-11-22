@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -107,15 +108,16 @@ export default function NewReceiptPage() {
       });
 
       if (response.ok) {
+        toast.success('Receipt created successfully');
         refreshDashboard();
         router.push('/operations/receipts');
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create receipt');
+        toast.error(error.error || 'Failed to create receipt');
       }
     } catch (error) {
       console.error('Error creating receipt:', error);
-      alert('Failed to create receipt');
+      toast.error('Failed to create receipt');
     } finally {
       setLoading(false);
     }

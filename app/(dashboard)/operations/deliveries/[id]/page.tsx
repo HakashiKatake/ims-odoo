@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ArrowLeft, Package, MapPin, User, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { QRCodeDisplay } from '@/components/qr-code-display';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,11 +79,11 @@ export default function DeliveryDetailPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to validate delivery');
+        toast.error(error.error || 'Failed to validate delivery');
       }
     } catch (error) {
       console.error('Error validating delivery:', error);
-      alert('Failed to validate delivery');
+      toast.error('Failed to validate delivery');
     } finally {
       setUpdating(false);
     }
@@ -101,11 +103,11 @@ export default function DeliveryDetailPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to update delivery');
+        toast.error(error.error || 'Failed to update delivery');
       }
     } catch (error) {
       console.error('Error updating delivery:', error);
-      alert('Failed to update delivery');
+      toast.error('Failed to update delivery');
     } finally {
       setUpdating(false);
     }
@@ -154,6 +156,12 @@ export default function DeliveryDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               {getStatusBadge(delivery.status)}
+              <QRCodeDisplay
+                value={`DELIVERY:${delivery.reference}`}
+                title={`Delivery: ${delivery.reference}`}
+                description={`Status: ${delivery.status} | Location: ${delivery.location?.name || 'N/A'}`}
+                variant="icon"
+              />
               {delivery.status === 'draft' && (
                 <Button onClick={handleMarkReady} disabled={updating}>
                   <Clock className="mr-2 h-4 w-4" />

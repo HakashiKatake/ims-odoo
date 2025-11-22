@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
+import { toast } from 'sonner';
+import { QRCodeDisplay } from '@/components/qr-code-display';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -86,11 +88,11 @@ export default function LocationsPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to save location');
+        toast.error(error.error || 'Failed to save location');
       }
     } catch (error) {
       console.error('Error saving location:', error);
-      alert('Failed to save location');
+      toast.error('Failed to save location');
     }
   };
 
@@ -110,11 +112,11 @@ export default function LocationsPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to delete location');
+        toast.error(error.error || 'Failed to delete location');
       }
     } catch (error) {
       console.error('Error deleting location:', error);
-      alert('Failed to delete location');
+      toast.error('Failed to delete location');
     }
   };
 
@@ -230,6 +232,12 @@ export default function LocationsPage() {
                       <TableCell>{location.warehouse.name}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <QRCodeDisplay
+                            value={`LOCATION:${location.shortCode}`}
+                            title={`Location: ${location.name}`}
+                            description={`Code: ${location.shortCode} | Warehouse: ${location.warehouse.name}`}
+                            variant="icon"
+                          />
                           <Button
                             size="sm"
                             variant="outline"

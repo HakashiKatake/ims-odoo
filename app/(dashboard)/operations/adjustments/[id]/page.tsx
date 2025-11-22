@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { format } from 'date-fns';
-import { ArrowLeft, MapPin, Calendar, User, Package, ArrowLeftRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, User, Settings, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeDisplay } from '@/components/qr-code-display';
 import { Button } from '@/components/ui/button';
@@ -13,93 +13,87 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Separator } from '@/components/ui/separator';
 import { useStore } from '@/lib/store';
 
-interface Transfer {
+interface Adjustment {
   _id: string;
   reference: string;
-  from: {
+  location: {
     _id: string;
     name: string;
     warehouse: {
       name: string;
     };
   };
-  to: {
-    _id: string;
-    name: string;
-    warehouse: {
-      name: string;
-    };
-  };
-  scheduleDate: string;
+  reason: string;
   status: string;
   responsible: string;
+  notes?: string;
   products: Array<{
     product: {
       _id: string;
       name: string;
       sku: string;
     };
-    quantity: number;
-    transferredQuantity: number;
+    quantityChange: number;
+    adjustedQuantity: number;
   }>;
   createdAt: string;
   updatedAt: string;
 }
 
-export default function TransferDetailPage() {
+export default function AdjustmentDetailPage() {
   const router = useRouter();
   const params = useParams();
   const refreshDashboard = useStore((state) => state.refreshDashboard);
-  const [transfer, setTransfer] = useState<Transfer | null>(null);
+  const [adjustment, setAdjustment] = useState<Adjustment | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (params.id) {
-      fetchTransfer();
+      fetchAdjustment();
     }
   }, [params.id]);
 
-  const fetchTransfer = async () => {
+  const fetchAdjustment = async () => {
     try {
-      const response = await fetch(`/api/transfers/${params.id}`);
+      const response = await fetch(`/api/adjustments/${params.id}`);
       if (response.ok) {
         const data = await response.json();
-        setTransfer(data.transfer);
+        setAdjustment(data.adjustment);
       }
     } catch (error) {
-      console.error('Error fetching transfer:', error);
+      console.error('Error fetching adjustment:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleStatusChange = async (newStatus: string) => {
-    if (!transfer) return;
+    if (!adjustment) return;
 
     try {
-      const response = await fetch(`/api/transfers/${transfer._id}`, {
+      const response = await fetch(`/api/adjustments/${adjustment._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
 
       if (response.ok) {
-        toast.success('Transfer updated successfully');
-        await fetchTransfer();
+        toast.success('Adjustment updated successfully');
+        await fetchAdjustment();
         refreshDashboard();
       } else {
         const error = await response.json();
-        toast.error(error.error || `Failed to update transfer`);
+        toast.error(error.error || `Failed to update adjustment`);
       }
     } catch (error) {
-      console.error('Error updating transfer:', error);
-      toast.error('Failed to update transfer');
+      console.error('Error updating adjustment:', error);
+      toast.error('Failed to update adjustment');
     }
   };
 
   const handleMarkReady = () => handleStatusChange('ready');
   const handleValidate = () => {
-    if (confirm('Validate this transfer? Stock will be moved from source to destination location.')) {
+    if (confirm('Validate this adjustment? Stock levels will be updated immediately.')) {
       handleStatusChange('done');
     }
   };
@@ -115,25 +109,37 @@ export default function TransferDetailPage() {
     return variants[status] || variants.draft;
   };
 
+  const getReasonLabel = (reason: string) => {
+    const labels: Record<string, string> = {
+      damage: 'Damage',
+      loss: 'Loss/Theft',
+      found: 'Found',
+      expired: 'Expired',
+      count_error: 'Count Error',
+      other: 'Other',
+    };
+    return labels[reason] || reason;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading transfer...</p>
+          <p className="mt-4 text-gray-600">Loading adjustment...</p>
         </div>
       </div>
     );
   }
 
-  if (!transfer) {
+  if (!adjustment) {
     return (
       <div className="py-8">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">Transfer not found</h2>
-            <Button className="mt-4" onClick={() => router.push('/operations/transfers')}>
-              Back to Transfers
+            <h2 className="text-2xl font-bold text-gray-900">Adjustment not found</h2>
+            <Button className="mt-4" onClick={() => router.push('/operations/adjustments')}>
+              Back to Adjustments
             </Button>
           </div>
         </div>
@@ -141,7 +147,7 @@ export default function TransferDetailPage() {
     );
   }
 
-  const statusConfig = getStatusBadge(transfer.status);
+  const statusConfig = getStatusBadge(adjustment.status);
 
   return (
     <div className="py-8">
@@ -153,24 +159,24 @@ export default function TransferDetailPage() {
           </Button>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{transfer.reference}</h1>
-              <p className="mt-2 text-gray-600">Transfer details and validation</p>
+              <h1 className="text-3xl font-bold text-gray-900">{adjustment.reference}</h1>
+              <p className="mt-2 text-gray-600">Adjustment details and validation</p>
             </div>
             <div className="flex gap-2">
               <QRCodeDisplay
-                value={`TRANSFER:${transfer.reference}`}
-                title={`Transfer: ${transfer.reference}`}
-                description={`Status: ${transfer.status} | From: ${transfer.from?.shortCode} → To: ${transfer.to?.shortCode}`}
+                value={`ADJUSTMENT:${adjustment.reference}`}
+                title={`Adjustment: ${adjustment.reference}`}
+                description={`Status: ${adjustment.status} | Reason: ${adjustment.reason} | Location: ${adjustment.location?.shortCode}`}
                 variant="icon"
               />
-              {transfer.status === 'waiting' && (
+              {adjustment.status === 'waiting' && (
                 <Button onClick={handleMarkReady}>
                   Mark as Ready
                 </Button>
               )}
-              {transfer.status === 'ready' && (
+              {adjustment.status === 'ready' && (
                 <Button onClick={handleValidate}>
-                  Validate Transfer
+                  Validate Adjustment
                 </Button>
               )}
             </div>
@@ -180,69 +186,67 @@ export default function TransferDetailPage() {
         <div className="grid gap-6 lg:grid-cols-2 mb-6">
           <Card>
             <CardHeader>
-              <CardTitle>Transfer Information</CardTitle>
-              <CardDescription>General details about the transfer</CardDescription>
+              <CardTitle>Adjustment Information</CardTitle>
+              <CardDescription>General details about the adjustment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-start">
                 <MapPin className="mr-3 h-5 w-5 text-gray-400 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-500">Source Location</p>
+                  <p className="text-sm font-medium text-gray-500">Location</p>
                   <p className="text-sm text-gray-900">
-                    {transfer.from.warehouse.name} / {transfer.from.name}
+                    {adjustment.location.warehouse.name} / {adjustment.location.name}
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start">
-                <ArrowLeftRight className="mr-3 h-5 w-5 text-gray-400 mt-0.5" />
+                <AlertTriangle className="mr-3 h-5 w-5 text-gray-400 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-500">Destination Location</p>
-                  <p className="text-sm text-gray-900">
-                    {transfer.to.warehouse.name} / {transfer.to.name}
-                  </p>
+                  <p className="text-sm font-medium text-gray-500">Reason</p>
+                  <p className="text-sm text-gray-900">{getReasonLabel(adjustment.reason)}</p>
                 </div>
               </div>
 
               <Separator />
 
               <div className="flex items-start">
-                <Calendar className="mr-3 h-5 w-5 text-gray-400 mt-0.5" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-500">Schedule Date</p>
-                  <p className="text-sm text-gray-900">
-                    {format(new Date(transfer.scheduleDate), 'MMMM dd, yyyy')}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start">
                 <User className="mr-3 h-5 w-5 text-gray-400 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-500">Responsible</p>
-                  <p className="text-sm text-gray-900">{transfer.responsible}</p>
+                  <p className="text-sm text-gray-900">{adjustment.responsible}</p>
                 </div>
               </div>
+
+              {adjustment.notes && (
+                <>
+                  <Separator />
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 mb-1">Notes</p>
+                    <p className="text-sm text-gray-900">{adjustment.notes}</p>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Timeline</CardTitle>
-              <CardDescription>Transfer status and dates</CardDescription>
+              <CardDescription>Adjustment status and dates</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <p className="text-sm font-medium text-gray-500">Created</p>
                 <p className="text-sm text-gray-900">
-                  {format(new Date(transfer.createdAt), 'MMM dd, yyyy HH:mm')}
+                  {format(new Date(adjustment.createdAt), 'MMM dd, yyyy HH:mm')}
                 </p>
               </div>
 
               <div>
                 <p className="text-sm font-medium text-gray-500">Last Updated</p>
                 <p className="text-sm text-gray-900">
-                  {format(new Date(transfer.updatedAt), 'MMM dd, yyyy HH:mm')}
+                  {format(new Date(adjustment.updatedAt), 'MMM dd, yyyy HH:mm')}
                 </p>
               </div>
 
@@ -262,7 +266,7 @@ export default function TransferDetailPage() {
           <CardHeader>
             <CardTitle>Products</CardTitle>
             <CardDescription>
-              {transfer.products.length} item(s) in this transfer
+              {adjustment.products.length} item(s) in this adjustment
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -271,15 +275,25 @@ export default function TransferDetailPage() {
                 <TableRow>
                   <TableHead>SKU</TableHead>
                   <TableHead>Product</TableHead>
-                  <TableHead className="text-right">Quantity</TableHead>
+                  <TableHead className="text-right">Quantity Change</TableHead>
+                  <TableHead className="text-right">Type</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transfer.products.map((item, index) => (
+                {adjustment.products.map((item, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-mono text-sm">{item.product.sku}</TableCell>
                     <TableCell>{item.product.name}</TableCell>
-                    <TableCell className="text-right font-medium">{item.quantity}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      <span className={item.quantityChange > 0 ? 'text-green-600' : 'text-red-600'}>
+                        {item.quantityChange > 0 ? '+' : ''}{item.quantityChange}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant={item.quantityChange > 0 ? 'default' : 'destructive'}>
+                        {item.quantityChange > 0 ? 'Addition' : 'Reduction'}
+                      </Badge>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

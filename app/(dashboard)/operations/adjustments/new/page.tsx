@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 
@@ -21,16 +22,17 @@ interface Location {
   _id: string;
   name: string;
   warehouse: {
+    _id: string;
     name: string;
   };
 }
 
 interface ProductLine {
   product: string;
-  quantity: number;
+  quantityChange: number;
 }
 
-export default function NewDeliveryPage() {
+export default function NewAdjustmentPage() {
   const router = useRouter();
   const refreshDashboard = useStore((state) => state.refreshDashboard);
   const [products, setProducts] = useState<Product[]>([]);
@@ -38,15 +40,14 @@ export default function NewDeliveryPage() {
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
-    contact: '',
-    from: '',
-    deliveryAddress: '',
-    scheduleDate: new Date().toISOString().split('T')[0],
+    location: '',
+    reason: '',
     responsible: '',
+    notes: '',
   });
 
   const [productLines, setProductLines] = useState<ProductLine[]>([
-    { product: '', quantity: 1 },
+    { product: '', quantityChange: 0 },
   ]);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function NewDeliveryPage() {
   };
 
   const addProductLine = () => {
-    setProductLines([...productLines, { product: '', quantity: 1 }]);
+    setProductLines([...productLines, { product: '', quantityChange: 0 }]);
   };
 
   const removeProductLine = (index: number) => {
@@ -99,7 +100,7 @@ export default function NewDeliveryPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/deliveries', {
+      const response = await fetch('/api/adjustments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,16 +110,16 @@ export default function NewDeliveryPage() {
       });
 
       if (response.ok) {
-        toast.success('Delivery created successfully');
+        toast.success('Adjustment created successfully');
         refreshDashboard();
-        router.push('/operations/deliveries');
+        router.push('/operations/adjustments');
       } else {
         const error = await response.json();
-        toast.error(error.error || 'Failed to create delivery');
+        toast.error(error.error || 'Failed to create adjustment');
       }
     } catch (error) {
-      console.error('Error creating delivery:', error);
-      toast.error('Failed to create delivery');
+      console.error('Error creating adjustment:', error);
+      toast.error('Failed to create adjustment');
     } finally {
       setLoading(false);
     }
@@ -128,52 +129,26 @@ export default function NewDeliveryPage() {
     <div className="py-8">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">New Delivery</h1>
-          <p className="mt-2 text-gray-600">Create a new outgoing stock operation</p>
+          <h1 className="text-3xl font-bold text-gray-900">New Stock Adjustment</h1>
+          <p className="mt-2 text-gray-600">Adjust inventory for damages, losses, or corrections</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Delivery Information</CardTitle>
-              <CardDescription>Basic details about the delivery</CardDescription>
+              <CardTitle>Adjustment Information</CardTitle>
+              <CardDescription>Details about the stock adjustment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contact">Customer Contact *</Label>
-                  <Input
-                    id="contact"
-                    value={formData.contact}
-                    onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+                  <Label htmlFor="location">Location *</Label>
+                  <Select 
+                    value={formData.location} 
+                    onValueChange={(value) => setFormData({ ...formData, location: value })} 
                     required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="responsible">Responsible Person *</Label>
-                  <Input
-                    id="responsible"
-                    value={formData.responsible}
-                    onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="deliveryAddress">Delivery Address *</Label>
-                <Input
-                  id="deliveryAddress"
-                  placeholder="Enter full delivery address"
-                  value={formData.deliveryAddress}
-                  onChange={(e) => setFormData({ ...formData, deliveryAddress: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="from">Source Location *</Label>
-                  <Select value={formData.from} onValueChange={(value) => setFormData({ ...formData, from: value })} required>
-                    <SelectTrigger id="from">
+                  >
+                    <SelectTrigger id="location">
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
                     <SelectContent>
@@ -186,15 +161,44 @@ export default function NewDeliveryPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="scheduleDate">Schedule Date *</Label>
-                  <Input
-                    id="scheduleDate"
-                    type="date"
-                    value={formData.scheduleDate}
-                    onChange={(e) => setFormData({ ...formData, scheduleDate: e.target.value })}
+                  <Label htmlFor="reason">Reason *</Label>
+                  <Select 
+                    value={formData.reason} 
+                    onValueChange={(value) => setFormData({ ...formData, reason: value })} 
                     required
-                  />
+                  >
+                    <SelectTrigger id="reason">
+                      <SelectValue placeholder="Select reason" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="damage">Damage</SelectItem>
+                      <SelectItem value="loss">Loss/Theft</SelectItem>
+                      <SelectItem value="found">Found</SelectItem>
+                      <SelectItem value="expired">Expired</SelectItem>
+                      <SelectItem value="count_error">Count Error</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="responsible">Responsible Person *</Label>
+                <Input
+                  id="responsible"
+                  value={formData.responsible}
+                  onChange={(e) => setFormData({ ...formData, responsible: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Add any additional details about this adjustment..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  rows={3}
+                />
               </div>
             </CardContent>
           </Card>
@@ -204,7 +208,7 @@ export default function NewDeliveryPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Products</CardTitle>
-                  <CardDescription>Select products and quantities</CardDescription>
+                  <CardDescription>Select products and quantity changes (use negative for reductions)</CardDescription>
                 </div>
                 <Button type="button" size="sm" onClick={addProductLine}>
                   <Plus className="mr-2 h-4 w-4" />
@@ -234,14 +238,14 @@ export default function NewDeliveryPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="w-32 space-y-2">
-                    <Label htmlFor={`quantity-${index}`}>Quantity</Label>
+                  <div className="w-40 space-y-2">
+                    <Label htmlFor={`quantity-${index}`}>Quantity Change</Label>
                     <Input
                       id={`quantity-${index}`}
                       type="number"
-                      min="1"
-                      value={line.quantity}
-                      onChange={(e) => updateProductLine(index, 'quantity', parseInt(e.target.value) || 1)}
+                      placeholder="+10 or -5"
+                      value={line.quantityChange || ''}
+                      onChange={(e) => updateProductLine(index, 'quantityChange', parseInt(e.target.value) || 0)}
                       required
                     />
                   </div>
@@ -257,6 +261,11 @@ export default function NewDeliveryPage() {
                   )}
                 </div>
               ))}
+              <div className="rounded-md bg-blue-50 p-4">
+                <p className="text-sm text-blue-700">
+                  💡 <strong>Tip:</strong> Use positive numbers (+10) to add stock, negative numbers (-5) to remove stock.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -265,7 +274,7 @@ export default function NewDeliveryPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Delivery'}
+              {loading ? 'Creating...' : 'Create Adjustment'}
             </Button>
           </div>
         </form>

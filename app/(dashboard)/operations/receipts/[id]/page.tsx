@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { ArrowLeft, Package, MapPin, User, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { toast } from 'sonner';
+import { QRCodeDisplay } from '@/components/qr-code-display';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -77,11 +79,11 @@ export default function ReceiptDetailPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to validate receipt');
+        toast.error(error.error || 'Failed to validate receipt');
       }
     } catch (error) {
       console.error('Error validating receipt:', error);
-      alert('Failed to validate receipt');
+      toast.error('Failed to validate receipt');
     } finally {
       setUpdating(false);
     }
@@ -101,11 +103,11 @@ export default function ReceiptDetailPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to update receipt');
+        toast.error(error.error || 'Failed to update receipt');
       }
     } catch (error) {
       console.error('Error updating receipt:', error);
-      alert('Failed to update receipt');
+      toast.error('Failed to update receipt');
     } finally {
       setUpdating(false);
     }
@@ -154,6 +156,12 @@ export default function ReceiptDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               {getStatusBadge(receipt.status)}
+              <QRCodeDisplay
+                value={`RECEIPT:${receipt.reference}`}
+                title={`Receipt: ${receipt.reference}`}
+                description={`Status: ${receipt.status} | Location: ${receipt.location?.name || 'N/A'}`}
+                variant="icon"
+              />
               {receipt.status === 'draft' && (
                 <Button onClick={handleMarkReady} disabled={updating}>
                   <Clock className="mr-2 h-4 w-4" />

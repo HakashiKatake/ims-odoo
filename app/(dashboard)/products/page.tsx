@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, AlertTriangle, Package } from 'lucide-react';
+import { toast } from 'sonner';
+import { QRCodeDisplay } from '@/components/qr-code-display';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,11 +87,11 @@ export default function ProductsPage() {
         refreshDashboard();
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to save product');
+        toast.error(error.error || 'Failed to save product');
       }
     } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Failed to save product');
+      console.error('Error deleting product:', error);
+      toast.error('Failed to delete product');
     }
   };
 
@@ -116,15 +118,16 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
+        toast.success('Product deleted successfully');
         fetchProducts();
         // Refresh dashboard to update product count
         refreshDashboard();
       } else {
-        alert('Failed to delete product');
+        toast.error('Failed to delete product');
       }
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      toast.error('Failed to delete product');
     }
   };
 
@@ -317,6 +320,12 @@ export default function ProductsPage() {
                       <TableCell>{product.minStockLevel}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
+                          <QRCodeDisplay
+                            value={`PRODUCT:${product.sku}`}
+                            title={`Product: ${product.name}`}
+                            description={`SKU: ${product.sku} | Category: ${product.category}`}
+                            variant="icon"
+                          />
                           <Button
                             size="sm"
                             variant="outline"

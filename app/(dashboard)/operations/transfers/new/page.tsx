@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Minus } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -97,7 +98,7 @@ export default function NewTransferPage() {
     e.preventDefault();
     
     if (formData.from === formData.to) {
-      alert('Source and destination locations must be different');
+      toast.warning('Source and destination locations must be different');
       return;
     }
 
@@ -114,15 +115,16 @@ export default function NewTransferPage() {
       });
 
       if (response.ok) {
+        toast.success('Transfer created successfully');
         refreshDashboard();
         router.push('/operations/transfers');
       } else {
         const error = await response.json();
-        alert(error.error || 'Failed to create transfer');
+        toast.error(error.error || 'Failed to create transfer');
       }
     } catch (error) {
       console.error('Error creating transfer:', error);
-      alert('Failed to create transfer');
+      toast.error('Failed to create transfer');
     } finally {
       setLoading(false);
     }
