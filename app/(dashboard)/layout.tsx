@@ -1,5 +1,5 @@
 import { Navbar } from '@/components/navbar';
-import { AIChatbot } from '@/components/ai-chatbot';
+import  AIChat  from '@/components/ai-chatbot';
 
 export default function DashboardLayout({
   children,
@@ -10,7 +10,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-[#0B0E14]">
       <Navbar />
       <main>{children}</main>
-      <AIChatbot />
+      <AIChat inventory={[]} history={[]} />
     </div>
   );
 }
