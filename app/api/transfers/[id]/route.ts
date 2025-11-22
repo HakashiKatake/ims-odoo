@@ -3,7 +3,6 @@ import connectDB from '@/lib/db';
 import Transfer from '@/models/Transfer';
 import { requireAuth } from '@/lib/auth';
 import { updateStock } from '@/lib/stock-manager';
-import { generateReference } from '@/lib/utils';
 
 export async function GET(
   request: NextRequest,
@@ -112,8 +111,6 @@ export async function PATCH(
           documentId: transfer._id.toString(),
           responsible: transfer.responsible,
         });
-
-        productLine.transferredQuantity = productLine.quantity;
       }
     }
 

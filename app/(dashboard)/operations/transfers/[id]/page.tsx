@@ -19,6 +19,7 @@ interface Transfer {
   from: {
     _id: string;
     name: string;
+    shortCode: string;
     warehouse: {
       name: string;
     };
@@ -26,6 +27,7 @@ interface Transfer {
   to: {
     _id: string;
     name: string;
+    shortCode: string;
     warehouse: {
       name: string;
     };

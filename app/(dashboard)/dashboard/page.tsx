@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { Package, AlertTriangle, FileText, Truck, ArrowLeftRight, TrendingUp } from 'lucide-react';
+import { Package, AlertTriangle, FileText, Truck, ArrowLeftRight, TrendingUp, Activity, BarChart3 } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useStore } from '@/lib/store';
@@ -17,11 +18,43 @@ interface DashboardKPIs {
   internalTransfersScheduled: number;
 }
 
+interface AnalyticsData {
+  stockOverview: {
+    totalQuantity: number;
+    totalValue: number;
+  };
+  recentActivity: {
+    receipts: Array<{ _id: string; count: number; totalProducts: number }>;
+    deliveries: Array<{ _id: string; count: number; totalProducts: number }>;
+  };
+  topProducts: Array<{
+    _id: string;
+    name: string;
+    sku: string;
+    totalQuantity: number;
+    totalValue: number;
+  }>;
+  movementSummary: {
+    receipts: number;
+    deliveries: number;
+    transfers: number;
+    adjustments: number;
+  };
+  lowStockAlerts: Array<{
+    _id: string;
+    name: string;
+    sku: string;
+    totalStock: number;
+    minStockLevel: number;
+  }>;
+}
+
 export default function DashboardPage() {
   const { user } = useUser();
   const router = useRouter();
   const { dashboardStats, setDashboardStats, refreshDashboard } = useStore();
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -32,6 +65,15 @@ export default function DashboardPage() {
     }
 
     fetchDashboardData();
+    fetchAnalytics();
+
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => {
+      fetchDashboardData();
+      fetchAnalytics();
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, [user, router]);
 
   const fetchDashboardData = async () => {
@@ -46,6 +88,18 @@ export default function DashboardPage() {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch('/api/analytics/dashboard');
+      if (response.ok) {
+        const data = await response.json();
+        setAnalytics(data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
     }
   };
 
@@ -176,8 +230,141 @@ export default function DashboardPage() {
           </Card>
         </div>
 
+        {/* Analytics Charts */}
+        {analytics && (
+          <>
+            <div className="grid gap-6 lg:grid-cols-2 mt-6">
+              {/* Stock Movement Chart */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    Recent Activity (Last 7 Days)
+                  </CardTitle>
+                  <CardDescription>Receipts and deliveries trend</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <LineChart
+                      data={analytics.recentActivity.receipts.map((receipt, idx) => ({
+                        date: receipt._id,
+                        receipts: receipt.count,
+                        deliveries: analytics.recentActivity.deliveries[idx]?.count || 0,
+                      }))}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="date" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Line type="monotone" dataKey="receipts" stroke="#10b981" strokeWidth={2} />
+                      <Line type="monotone" dataKey="deliveries" stroke="#ef4444" strokeWidth={2} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              {/* Movement Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Movement Summary (30 Days)
+                  </CardTitle>
+                  <CardDescription>Total operations by type</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart
+                      data={[
+                        { name: 'Receipts', value: analytics.movementSummary.receipts },
+                        { name: 'Deliveries', value: analytics.movementSummary.deliveries },
+                        { name: 'Transfers', value: analytics.movementSummary.transfers },
+                        { name: 'Adjustments', value: analytics.movementSummary.adjustments },
+                      ]}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Top Products & Low Stock */}
+            <div className="grid gap-6 lg:grid-cols-2 mt-6">
+              {/* Top Products by Value */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Products by Value</CardTitle>
+                  <CardDescription>Highest inventory value items</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {analytics.topProducts.slice(0, 5).map((product, idx) => (
+                      <div key={product._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="font-bold text-lg text-gray-400">#{idx + 1}</div>
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-xs text-gray-500">{product.sku}</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-green-600">
+                            ${product.totalValue.toFixed(2)}
+                          </div>
+                          <div className="text-xs text-gray-500">{product.totalQuantity} units</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Low Stock Alerts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                    Low Stock Alerts
+                  </CardTitle>
+                  <CardDescription>Products below minimum levels</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {analytics.lowStockAlerts.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>All products are adequately stocked!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {analytics.lowStockAlerts.slice(0, 5).map((product) => (
+                        <div key={product._id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg border border-orange-200">
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-xs text-gray-500">{product.sku}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-orange-600">
+                              {product.totalStock} / {product.minStockLevel}
+                            </div>
+                            <div className="text-xs text-gray-500">Current / Min</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
         {/* Quick Actions */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-2 mt-6">
           <Card>
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>

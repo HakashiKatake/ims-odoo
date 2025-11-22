@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { UserButton, useUser } from '@clerk/nextjs';
-import { Package, Home, FileText, Truck, ArrowLeftRight, History, Settings, Warehouse, Wrench } from 'lucide-react';
+import { Package, Home, FileText, Truck, ArrowLeftRight, History, Settings, Warehouse, Wrench, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
@@ -14,6 +14,7 @@ const navigation = [
   { name: 'Delivery', href: '/operations/deliveries', icon: Truck },
   { name: 'Transfer', href: '/operations/transfers', icon: ArrowLeftRight },
   { name: 'Adjustments', href: '/operations/adjustments', icon: Wrench },
+  { name: 'Activity Log', href: '/activity-logs', icon: Activity },
   { name: 'Move History', href: '/move-history', icon: History },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];

@@ -159,7 +159,7 @@ export default function ReceiptDetailPage() {
               <QRCodeDisplay
                 value={`RECEIPT:${receipt.reference}`}
                 title={`Receipt: ${receipt.reference}`}
-                description={`Status: ${receipt.status} | Location: ${receipt.location?.name || 'N/A'}`}
+                description={`Status: ${receipt.status} | To: ${receipt.to?.name || 'N/A'}`}
                 variant="icon"
               />
               {receipt.status === 'draft' && (

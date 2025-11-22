@@ -159,7 +159,7 @@ export default function DeliveryDetailPage() {
               <QRCodeDisplay
                 value={`DELIVERY:${delivery.reference}`}
                 title={`Delivery: ${delivery.reference}`}
-                description={`Status: ${delivery.status} | Location: ${delivery.location?.name || 'N/A'}`}
+                description={`Status: ${delivery.status} | From: ${delivery.from?.name || 'N/A'}`}
                 variant="icon"
               />
               {delivery.status === 'draft' && (

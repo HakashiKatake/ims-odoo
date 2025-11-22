@@ -19,6 +19,7 @@ interface Adjustment {
   location: {
     _id: string;
     name: string;
+    shortCode: string;
     warehouse: {
       name: string;
     };
