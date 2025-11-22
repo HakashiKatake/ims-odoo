@@ -1,6 +1,7 @@
 import Stock from '@/models/Stock';
 import StockLedger, { MovementType } from '@/models/StockLedger';
 import Location from '@/models/Location';
+import Product from '@/models/Product';
 import mongoose from 'mongoose';
 
 interface StockMovement {
@@ -102,6 +103,9 @@ export async function getStockByProduct(
 }
 
 export async function getLowStockProducts(warehouseId?: string) {
+  // Ensure Product model is loaded
+  const ProductModel = Product;
+  
   const pipeline: any[] = [
     {
       $lookup: {
